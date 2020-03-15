@@ -1,7 +1,7 @@
 ! 
 ! Output hydrodynamic data in unconstructed mesh in Fortran
 ! Author: Tomoya Takiwaki
-!   Date: 2020/03/12
+!   Date: 2020/03/15
 !
 ! Reference1: http://www.xdmf.org/index.php/XDMF_Model_and_Format
 ! Reference2: https://www.visitusers.org/index.php?title=Using_XDMF_to_read_HDF5
@@ -19,6 +19,9 @@
       real(8),allocatable,dimension(:):: x2a,x2b,dvl2a
       real(8),allocatable,dimension(:):: x3a,x3b,dvl3a
       real(8),allocatable,dimension(:,:,:,:):: fld3D
+
+      integer:: tindex
+      real(8):: time
       end module stparam
 
       module unstparam
@@ -29,6 +32,7 @@
       real(4),allocatable,dimension(:,:):: xyz
       real(4),allocatable,dimension(:,:):: fldun
 
+      integer:: tindexdmp
       real(4):: timedmp
       data timedmp / 0.0 /
 
@@ -40,13 +44,17 @@
       end module unstparam
 
       program main
+      use stparam, only:tindex
       implicit none
 
       write(6,*) "program started"
-      call MakingStrData
-      call MakingUnstrData
-      call OutputHDF5
-      call OutputXDMF
+
+      do tindex=1,10
+         call MakingStrData
+         call MakingUnstrData
+         call OutputHDF5
+         call OutputXDMF
+      enddo
 
       stop "program normally finished"
       end program
@@ -58,19 +66,21 @@
       real(8)::rmin,rmax,dr
       real(8)::tmin,tmax,dt
       real(8)::pmin,pmax,dp
-
+      
       real(8)::pi
       integer:: i,j,k
+      logical,save:: is_inited
+      data is_inited / .false. /
 
       pi=acos(-1.0d0)
 !      write(6,*)"pi=",pi
 
-      nr=10
+      nr=100
       rmin=0.0d0
       rmax=1.0d0
       dr  = (rmax-rmin)/nr
       n1d=nr
-      allocate(x1a(1:n1d+1),x1b(1:n1d),dvl1a(1:n1d))
+      if(.not. is_inited) allocate(x1a(1:n1d+1),x1b(1:n1d),dvl1a(1:n1d))
       x1a(1)=rmin
       do i=2,n1d+1
          x1a(i) = x1a(i-1)+dr
@@ -79,14 +89,14 @@
            x1b(i) = 0.5d0*(x1a(i+1)   +x1a(i)   )
          dvl1a(i) =       (x1a(i+1)**3-x1a(i)**3)/3
       enddo
-      write(6,*)"check 0=",rmin
+      if(.not. is_inited) write(6,*)"check 0=",rmin
       
-      nt=12
+      nt=100
       tmin=0.0d0
       tmax=pi
       dt  = (tmax-tmin)/nt
       n2d=nt
-      allocate(x2a(1:n2d+1),x2b(1:n2d),dvl2a(1:n2d))
+      if(.not. is_inited) allocate(x2a(1:n2d+1),x2b(1:n2d),dvl2a(1:n2d))
       x2a(1) = tmin
       do j=2,n2d+1
          x2a(j) = x2a(j-1)+dt
@@ -96,14 +106,14 @@
          dvl2a(j) =    -  (cos(x2a(j+1))-cos(x2a(j)))
       enddo
 
-      write(6,*)"check 2=",sum(dvl2a(:))
+      if(.not. is_inited) write(6,*)"check 2=",sum(dvl2a(:))
 
-      np=10
+      np=200
       pmin=0.0d0
       pmax=2.0*pi
       dp  = (pmax-pmin)/np
       n3d=np
-      allocate(x3a(1:n3d+1),x3b(1:n3d),dvl3a(1:n3d))
+      if(.not. is_inited) allocate(x3a(1:n3d+1),x3b(1:n3d),dvl3a(1:n3d))
       x3a(1) = pmin
       do k=2,n3d+1
          x3a(k) = x3a(k-1)+dp
@@ -112,18 +122,23 @@
            x3b(k) = 0.5d0*(x3a(k+1)+x3a(k))
          dvl3a(k) =       (x3a(k+1)-x3a(k))
       enddo
-      write(6,*)"check 2pi=",sum(dvl3a(:))
+      if(.not. is_inited) write(6,*)"check 2pi=",sum(dvl3a(:))
 
       nfld=1
-      allocate(fld3D(n1d,n2d,n3d,nfld))
+      if(.not. is_inited) allocate(fld3D(n1d,n2d,n3d,nfld))
+      time = tindex
+      
       do k=1,n3d
       do j=1,n2d
       do i=1,n1d
-         fld3D(i,j,k,1) = x1b(i) 
+         fld3D(i,j,k,1) = (exp(-((x1b(i)-0.5)/0.1)**2))
+     &                  *(1.0d0+0.2*sin(1.0*x2b(j)))
+     &                  *(1.0d0+0.2*cos(4.0*(x3b(k) - 2.0*pi*time/10.0))) 
       enddo
       enddo
       enddo
 
+      is_inited =.true.
       return
       end subroutine MakingStrData
 
@@ -131,24 +146,31 @@
       use stparam
       use unstparam
       implicit none
-      integer,allocatable,dimension(:,:,:)::NodeNumber
+      integer,allocatable,dimension(:,:,:),save::NodeNumber
       integer::i,j,k,m,n
       integer::thenumber
       integer::theelement
-      real(8),allocatable,dimension(:)::ave
+      real(8),allocatable,dimension(:),save::ave
 
       integer,parameter:: notset=-1
 
+      logical,save:: is_inited
+      data is_inited / .false. /
+
+      tindexdmp=tindex
+      timedmp  =real(time)
+
       Nvar=nfld
-      allocate(ave(Nvar))
+      if(.not. is_inited) allocate(ave(Nvar))
       Nnodes=n1d*n2d*n3d   ! normal node
      &      +    n2d*n3d+1 ! outer and inner radial node
      &      +    2*(n1d+1) ! singular points at theta=0 and pi
-      allocate(fldun(0:Nnodes-1,Nvar))
-      allocate(  xyz(3,0:Nnodes-1))
+      
+      if(.not. is_inited) allocate(fldun(0:Nnodes-1,Nvar))
+      if(.not. is_inited) allocate(  xyz(3,0:Nnodes-1))
 
       Nelements=(n1d+1)*(n2d+1)*(n3d) ! for 1d and 2d direction we added 1 mesh
-      allocate(NodeNumber(0:n1d+1,0:n2d+1,0:n3d+1))
+      if(.not. is_inited) allocate(NodeNumber(0:n1d+1,0:n2d+1,0:n3d+1))
       NodeNumber(:,:,:) = notset !  to find a bug
  
       thenumber=0
@@ -157,10 +179,10 @@
       do i=1,n1d
 ! Making New Nodes begin
          NodeNumber(i,j,k)= thenumber
-         xyz(1,thenumber) = x1b(i)*sin(x2b(j))*cos(x3b(k))
-         xyz(2,thenumber) = x1b(i)*sin(x2b(j))*sin(x3b(k))
-         xyz(3,thenumber) = x1b(i)*cos(x2b(j))
-         fldun(thenumber,1:Nvar) = fld3D(i,j,k,1:n1d)
+         xyz(1,thenumber) = real(x1b(i)*sin(x2b(j))*cos(x3b(k)) )
+         xyz(2,thenumber) = real(x1b(i)*sin(x2b(j))*sin(x3b(k)) )
+         xyz(3,thenumber) = real(x1b(i)*cos(x2b(j))             )
+         fldun(thenumber,1:Nvar) = real( fld3D(i,j,k,1:n1d)     )
          thenumber=thenumber+1
 ! Making New Nodes end
       enddo
@@ -173,10 +195,10 @@
       do j=1,n2d
 ! Making New Nodes begin
          NodeNumber(i,j,k)= thenumber
-         xyz(1,thenumber) = x1a(i)*sin(x2b(j))*cos(x3b(k))
-         xyz(2,thenumber) = x1a(i)*sin(x2b(j))*sin(x3b(k))
-         xyz(3,thenumber) = x1a(i)*cos(x2b(j))
-         fldun(thenumber,1:Nvar) = fld3D(i-1,j,k,1:n1d)
+         xyz(1,thenumber) = real(x1a(i)*sin(x2b(j))*cos(x3b(k)) )
+         xyz(2,thenumber) = real(x1a(i)*sin(x2b(j))*sin(x3b(k)) )
+         xyz(3,thenumber) = real(x1a(i)*cos(x2b(j))             )
+         fldun(thenumber,1:Nvar) = real(fld3D(i-1,j,k,1:n1d)    )
          thenumber=thenumber+1
 ! Making New Nodes end
       enddo
@@ -185,9 +207,9 @@
 ! inner boundary of the radial mesh
 ! Making New Nodes begin
       NodeNumber(0,1:n2d,1:n3d)= thenumber
-      xyz(1,thenumber) =  0.0d0
-      xyz(2,thenumber) =  0.0d0
-      xyz(3,thenumber) =  0.0d0
+      xyz(1,thenumber) =  real(0.0d0)
+      xyz(2,thenumber) =  real(0.0d0)
+      xyz(3,thenumber) =  real(0.0d0)
       do m=1,nfld
          ave(m)=0.0d0
          do k=1,n3d
@@ -196,7 +218,7 @@
          enddo
          enddo
          ave(m) = ave(m)/sum(dvl2a(:))/sum(dvl3a(:))
-         fldun(thenumber,m) = ave(m)
+         fldun(thenumber,m) = real(ave(m))
       enddo
       thenumber=thenumber+1
 ! Making New Nodes end
@@ -205,9 +227,9 @@
       do i=1,n1d
 ! Making New Nodes begin
          NodeNumber(i,0,1:n3d)= thenumber
-         xyz(1,thenumber) = 0.0d0
-         xyz(2,thenumber) = 0.0d0
-         xyz(3,thenumber) = x1b(i)
+         xyz(1,thenumber) = real(0.0d0)
+         xyz(2,thenumber) = real(0.0d0)
+         xyz(3,thenumber) = real(x1b(i))
 
          do m=1,nfld
          ave(m)=0.0d0
@@ -215,7 +237,7 @@
             ave(m)=ave(m)+fld3D(i,1,k,m)*dvl3a(k)
          enddo
          ave(m) = ave(m)/sum(dvl3a(:))
-         fldun(thenumber,m) = ave(m)
+         fldun(thenumber,m) = real(ave(m))
          enddo
          thenumber=thenumber+1
 ! Making New Nodes end
@@ -225,10 +247,10 @@
 
 ! Making New Nodes begin
       NodeNumber(n1d+1,    0,1:n3d)=thenumber
-      xyz(1,thenumber) = 0.0d0
-      xyz(2,thenumber) = 0.0d0
-      xyz(3,thenumber) = x1a(n1d+1)
-      fldun(thenumber,1:Nvar) = fldun(NodeNumber(n1d,0,1),1:Nvar)
+      xyz(1,thenumber) =  real(     0.0d0)
+      xyz(2,thenumber) =  real(     0.0d0)
+      xyz(3,thenumber) =  real(x1a(n1d+1))
+      fldun(thenumber,1:Nvar) = real(fldun(NodeNumber(n1d,0,1),1:Nvar))
       thenumber=thenumber+1
 ! Making New Nodes end
 
@@ -236,16 +258,16 @@
       do i=1,n1d
 ! Making New Nodes begin
          NodeNumber(i,n2d+1,1:n3d)= thenumber
-         xyz(1,thenumber) =  0.0d0
-         xyz(2,thenumber) =  0.0d0
-         xyz(3,thenumber) = -x1b(i)
+         xyz(1,thenumber) = real(  0.0d0)
+         xyz(2,thenumber) = real(  0.0d0)
+         xyz(3,thenumber) = real(-x1b(i))
          do m=1,nfld
          ave(m)=0.0d0
          do k=1,n3d
             ave(m)=ave(m)+fld3D(i,n2d,k,m)*dvl3a(k)
          enddo
          ave(m) = ave(m)/sum(dvl3a(:))
-         fldun(thenumber,m) = ave(m)
+         fldun(thenumber,m) = real(ave(m))
          enddo
          thenumber=thenumber+1
 ! Making New Nodes end
@@ -273,8 +295,9 @@
       write(6,*) "Number of Nodes           ",thenumber
       write(6,*) "Number of Nodes (expected)",Nnodes
        
-      allocate(connectivity(8,Nelements))
+      if(.not. is_inited) allocate(connectivity(8,Nelements))
 
+      tindexdmp = tindex
       theelement=0
       do k=1,n3d
       do j=0,n2d
@@ -300,6 +323,8 @@
       write(6,*) "Number of Element          ",theelement
       write(6,*) "Number of Element(expected)",Nelements
        
+      is_inited = .true.
+
       return
       end subroutine MakingUnstrData
 
@@ -323,12 +348,12 @@
       integer,allocatable,dimension(:,:):: con2
 
 ! Determine the output filename
-      fname = "test.hdf5"
-      fpath = fname
+      write(fname,"(a4,i3.3,a5)") "test",tindexdmp,".hdf5"
+      fpath = "./"//fname
 
 ! Determine the XDMF filename
-      fnxmf = "test.xmf"
-      fpxmf = fnxmf
+      write(fnxmf,"(a4,i3.3,a4)") "test",tindexdmp,".xmf"
+      fpxmf = "./"//fnxmf
 
 ! Open HDF5
       CALL h5open_f (error)
