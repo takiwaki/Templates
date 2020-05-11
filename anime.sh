@@ -4,9 +4,17 @@ dirf=snapshots
 dirm=movies
 prename=out
 
+if [ ! -d $dirf ]; then
+    mkdir $dirf
+fi
+
 for n in {1..100} ; do 
     gnuplot -e num=$n anime.plt
 done
+
+if [ ! -d $dirm ]; then
+    mkdir $dirm
+fi
 
 # first file
 fstfile=`ls -1 ${dirf}/${prename}*.png  2>/dev/null | head -1`
