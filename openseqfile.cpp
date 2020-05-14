@@ -1,3 +1,10 @@
+//
+// output sequencial files
+//
+// References
+// https://qiita.com/qiita_TT/items/e3755bb27d0bbb37ef40
+//
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -6,25 +13,27 @@ using namespace std;
 
 main(){
   // index for time
-  int n;
+  int    n;
   double t;
 
   // for output file
   char outfile[10];
-  FILE *fout;
-  int ret;
+  FILE       *fout;
+  int          ret;
 
-  // some array
+  // index of position
   const int in=100;
-    double   x[in];
-    double rho[in];
-  int i;
+  int            i;
+
+  // some arraies
+  double     x[in];
+  double   rho[in];
   
-  for(i=1;i<in;i++){
+  for(i=0;i<in;i++){
     x[i] = 0.1*i;
   }
 
-  for(n=1;n<10;n++){
+  for(n=0;n<10;n++){
     t=0.1*n;
     for(i=0;i<in;i++){
       rho[i] = (x[i]-t);
