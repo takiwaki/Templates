@@ -1,16 +1,13 @@
 #!/bin/bash
 
-dirf=snapshots
+dirf=snap
 dirm=movies
-prename=out
+prename=x-r
 
 if [ ! -d $dirf ]; then
-    mkdir $dirf
+    echo "cannot find ",$dirf
+    exit
 fi
-
-for n in {1..100} ; do 
-    gnuplot -e num=$n anime.plt
-done
 
 if [ ! -d $dirm ]; then
     mkdir $dirm

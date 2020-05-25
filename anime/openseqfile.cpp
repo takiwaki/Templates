@@ -17,7 +17,7 @@ main(){
   double t;
 
   // for output file
-  char outfile[10];
+  char outfile[20];
   FILE       *fout;
   int          ret;
 
@@ -28,18 +28,20 @@ main(){
   // some arraies
   double     x[in];
   double   rho[in];
+
+  cout << "files are save in snap/" << endl;
   
   for(i=0;i<in;i++){
     x[i] = 0.1*i;
   }
 
-  for(n=0;n<10;n++){
+  for(n=1;n<=100;n++){
     t=0.1*n;
     for(i=0;i<in;i++){
       rho[i] = (x[i]-t);
     }
 
-    ret=sprintf(outfile,"n%05d.dat",n);
+    ret=sprintf(outfile,"snap/n%05d.dat",n);
     cout << outfile << endl;
 
     fout = fopen(outfile,"wt");

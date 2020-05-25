@@ -29,17 +29,19 @@ set style line 92 lt 2 lw 6 lc rgb "black" #
 if (exist("num")==0 ) num=100
 print num
 
-outfile=sprintf("snapshots/out%05d.png",num)
+inpfile=sprintf("snap/n%05d.dat",num)
+outfile=sprintf("snap/x-r%05d.png",num)
+
 set output outfile
 
 timetext=sprintf("t=%d",num)
 
 set label 1 timetext at graph 0.1,0.2 
 
-set xrange [-pi:pi]
-set yrange [-1:1]
+set xrange [*:*]
+set yrange [-10:10]
  
-plot sin(x-0.1*num) w l lw 6 notitle
+plot inpfile w l lw 6 notitle
 
 ##########################################
 # Finalize
