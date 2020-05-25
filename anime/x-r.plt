@@ -34,7 +34,11 @@ outfile=sprintf("snap/x-r%05d.png",num)
 
 set output outfile
 
-timetext=sprintf("t=%d",num)
+command=sprintf("awk 'NR==1{print($2)}' %s", inpfile)
+#print command
+timenum=system(command)
+#print timenum
+timetext=sprintf("t=%s",timenum)
 
 set label 1 timetext at graph 0.1,0.2 
 
@@ -49,4 +53,3 @@ plot inpfile w l lw 6 notitle
 
 reset
 if(pngflag==1)set terminal pop
-
