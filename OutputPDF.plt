@@ -1,22 +1,19 @@
 reset
 
-epsflag=1
-if(epsflag==1)set terminal push
-if(epsflag==1)set terminal postscript eps color enhanced "Helvetica, 28" fontfile 'cmsy10.pfa'
+pdfflag=1
+if(pdfflag==1)set terminal push
+if(pdfflag==1)set terminal pdfcairo dashed enhanced font "Helvetica,20"
+if(pdfflag==1)set encoding utf8
 
-set style line 11 lt 1 lw 6 lc rgb "#ff2800" # universal design red 
-set style line 12 lt 2 lw 6 lc rgb "#ff2800" # universal design red 
-set style line 13 lt 3 lw 6 lc rgb "#ff2800" # universal design red 
-
-set style line 21 lt 1 lw 6 lc rgb "#0041ff" # universal design blue
-set style line 3 lt 3 lw 6 lc rgb "#35a16B" # universal design green
-
-set style line 4 lt 3 lw 6 lc rgb "#faf500" # universal design yellow
-set style line 5 lt 3 lw 6 lc rgb "#66ccff" # universal design sky-blue,azure
-set style line 6 lt 3 lw 6 lc rgb "#ff99a0" # universal design pink
-set style line 31 lt 3 lw 6 lc rgb "#ff9900" # universal design orange
-set style line 8 lt 3 lw 6 lc rgb "#9a0079" # universal design purple
-set style line 9 lt 3 lw 6 lc rgb "#663300" # universal design brown
+set style line 1 lt 1 lw 6 lc rgb "#ff2800" # universal design red 
+set style line 2 lt 1 lw 6 lc rgb "#0041ff" # universal design blue
+set style line 3 lt 1 lw 6 lc rgb "#35a16B" # universal design green
+set style line 4 lt 1 lw 6 lc rgb "#faf500" # universal design yellow
+set style line 5 lt 1 lw 6 lc rgb "#66ccff" # universal design sky-blue,azure
+set style line 6 lt 1 lw 6 lc rgb "#ff99a0" # universal design pink
+set style line 7 lt 1 lw 6 lc rgb "#ff9900" # universal design orange
+set style line 8 lt 1 lw 6 lc rgb "#9a0079" # universal design purple
+set style line 9 lt 1 lw 6 lc rgb "#663300" # universal design brown
  
 set style line 91 lt 1 lw 6 lc rgb "black" # 
 set style line 92 lt 2 lw 6 lc rgb "black" #
@@ -28,7 +25,7 @@ modelname="2D"
 ##########################################
 # Evolusiton of shock and Gain Radius
 ##########################################
-if(epsflag==1)set output "t-rsrg.eps"
+if(pdfflag==1)set output "t-rsrg.pdf"
 
 set xlabel "Time after bounce [ms]"
 set xrange [-10:1000]
@@ -46,7 +43,7 @@ plot NaN notitle \
 
 
 
-if(epsflag==1)set output "t-rs.eps"
+if(pdfflag==1)set output "t-rs.pdf"
 
 set xlabel "Time after bounce [ms]"
 set xrange [-10:500]
@@ -65,7 +62,7 @@ plot NaN notitle \
 ##########################################
 # Evolusiton of Explosion Energy
 ##########################################
-if(epsflag==1)set output "t-Eexp.eps"
+if(pdfflag==1)set output "t-Eexp.pdf"
 
 set xlabel "Time after bounce [ms]"
 xnorm=1e3
@@ -91,7 +88,7 @@ plot NaN notitle \
 ##########################################
 # Evolusiton of Ni mass
 ##########################################
-if(epsflag==1)set output "t-M_Ni.eps"
+if(pdfflag==1)set output "t-M_Ni.pdf"
 
 set xlabel "Time after bounce [ms]"
 xnorm=1e3
@@ -116,5 +113,5 @@ plot NaN notitle \
 ##########################################
 
 reset
-if(epsflag==1)set terminal pop
+if(pdfflag==1)set terminal pop
 
