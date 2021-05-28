@@ -17,6 +17,7 @@
       implicit none
       integer, parameter::nmax=1000
       integer::nstp
+      real(8)::norm
 
       call Initialize
       time=0.0
@@ -26,6 +27,8 @@
 !         write(6,*)dpv(:) ! debug
          dt = Coulant/sqrt(dpv(1)**2+dpv(2)**2+dpv(3)**2)
          pv(1:3)=pv(1:3)+ dt*dpv(1:3)
+         norm=sqrt(pv(1)**2+pv(2)**2+pv(3)**2)
+         pv(1:3)=pv(1:3)/norm
          time=time+dt
          if( mod(nstp,10) == 0) call Output
       enddo
@@ -70,7 +73,9 @@
       write(outfile,"(a3,i5.5,a4)") 'plv',onum,'.dat'
       path='./data/' // outfile
       open(unitout,file=path,status='replace',form='formatted') 
-      write(unitout,'(4(1x,E15.6e3))') time,pv(1),pv(2),pv(3)
+      write(unitout,'(1a,(1x,F6.2))') "#",time
+      write(unitout,'(6(1x,E15.6e3))') pv(1),pv(2),pv(3)
+     &                                ,bv(1),bv(2),bv(3)
       close(unitout)
       onum=onum+1
       return
