@@ -17,7 +17,8 @@ timetxt="time=".time
 print timetxt
 
 set size ratio 1
-lsize=1.2e0
+set view 80, 30, 1, 1
+lsize=1.0e0
 set xrange [-lsize:lsize]
 set yrange [-lsize:lsize]
 set zrange [-lsize:lsize]
@@ -27,9 +28,12 @@ set zrange [-lsize:lsize]
 
 set label 3 timetxt at screen 0.25, screen 0.85
 
+scale=5.0
 
 splot input u (0):(0):(0):1:2:3 w vect lw 5 title "P" \
-,     input u (0):(0):(0):4:5:6 w vect lw 5 title "B"
+,     input u (0):(0):(0):(norm=sqrt($4**2+$5**2+$6**2),$4/norm):($5/norm):($6/norm) w vect lw 5 title "H" \
+#,     input u (0):(0):(0):($7*scale):($8*scale):($9*scale) w vect lw 5 title "{/Symbol w}B" \
+#,     input u (0):(0):(0):($10*scale):($11*scale):($12*scale) w vect lw 5 title "{/Symbol l}L" \
 
 unset label 3
 
