@@ -5,6 +5,6 @@ This program makes the plots of pendulumn, which is used to explain the neutrino
 
 ## Example
 
-![Sample](/img/plv00210.png)
+![Sample](./img/plv00210.png)
 
 
