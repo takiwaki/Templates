@@ -1,0 +1,10 @@
+# emacs back up
+*~
+
+# 
+*.x
+*.f
+*.o
+*.mod
+*.dat
+*.png
