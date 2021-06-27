@@ -6,10 +6,13 @@ OPTS=
 .cpp.o: 
 	${CC} ${OPTS} -c $<
 
-all: ex1.exe
+all: ex1.exe ex2.exe
 
 ex1.exe: ex1.o
 	${CC} ${OPTS} $^ -o $@
 
 ex2.exe: ex2.o
 	${CC} ${OPTS} $^ -o $@
+
+clean:
+	rm *.o *.exe

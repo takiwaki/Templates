@@ -1,8 +1,8 @@
 #include <iostream>
 #include "ex2.hpp"
 
-const int imax=IMAX;
-const int jmax=JMAX;
+constexpr int imax=IMAX;
+constexpr int jmax=JMAX;
 
 namespace variables{
   double A[jmax][imax];

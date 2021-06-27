@@ -1,5 +1,5 @@
-#ifndef _CGS_UNITS
-#define _CGS_UNITS
+#ifndef _EX2
+#define _EX2
 
 #define IMAX 2
 #define JMAX 3
