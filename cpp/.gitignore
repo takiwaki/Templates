@@ -1,0 +1,6 @@
+# emacs back up
+*~
+
+# 
+*.o
+*.exe
