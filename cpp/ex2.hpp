@@ -1,11 +1,11 @@
 #ifndef _EX2
 #define _EX2
 
-#define IMAX 2
-#define JMAX 3
+constexpr int imax=3;
+constexpr int jmax=2;
 
 namespace variables{
-  extern double A[JMAX][IMAX];
+  extern double A[jmax][imax];
 };
 
 void setA();
