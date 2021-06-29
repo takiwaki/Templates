@@ -14,5 +14,8 @@ ex1.exe: ex1.o
 ex2.exe: ex2.o
 	${CC} ${OPTS} $^ -o $@
 
+ex3.exe: ex3.o
+	${CC} ${OPTS} $^ -o $@
+
 clean:
 	rm *.o *.exe
