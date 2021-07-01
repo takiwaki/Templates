@@ -24,6 +24,8 @@ int main(){
   cout<<"B[0][0]="<<B(0,0)<<endl;
   changeB(B);
   cout<<"B[0][0]="<<B(0,0)<<endl;
+  showB(B);
+  cout<<"B[10][10]="<<B(10,10)<<endl;
 }
 
 void setA(){
@@ -37,10 +39,16 @@ void setA(){
 }
 
 void changeB(matrix<double> (&B)){
-  using namespace variables;
   for(int j=0;j<jmax;j++){
   for(int i=0;i<imax;i++){
     B(j,i) =2.0e0;
+  }
+  }
+}
+void showB(const matrix<double> (&B)){
+  for(int j=0;j<jmax;j++){
+  for(int i=0;i<imax;i++){
+    std::cout<<B(j,i)<<std::endl;
   }
   }
 }
