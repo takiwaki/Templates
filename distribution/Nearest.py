@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-# Data Shaping
-# This code is used to shape the data
-
 import sys # system call
 import numpy as np
 import math
@@ -14,44 +11,30 @@ import re
 import matplotlib.colors as colors
 
 from scipy.interpolate import griddata
+import random
+from random import randint, randrange
 
 #################################
 # open files
 #################################
 
-inputfile="sppdata/sppSc.00475"
- 
-try:
-    input =inputfile
-    print(input)
-    finp  = open(input, 'r')
-    print("Reading " + input)
-    data = np.loadtxt(input,comments='#')
-    print("... done")
-    finp.close()
-except IOError:
-    print('"%s" cannot be opened.' % input)
-    sys.exit()
+xinp=np.empty(0)
+yinp=np.empty(0)
+zinp=np.empty(0)
 
+for n in range(1000):
+    xtmp = randrange(1.0, 10.0)
+    ytmp = 10**(randrange(1.0, 10.0))
+    ztmp = int((xtmp-5.0)*(np.log10(ytmp)-5.0))
 
-columns = [data[:, n] for n in range(22)]
-radius, theta, phi, volume, rho, Ye, T, s, P, vr,vt,vp, yed,ed,ebind,shock, Lnue,Enue, Lnub, Enub, LnuX, EnuX = columns
-Msolar=1.9891e33
-s_eject =np.empty(0)
-Ye_eject=np.empty(0)
-dM_eject=np.empty(0)
-for n in range(radius.size):
-    if shock[n] >  0.0 and ebind[n] >=  0.0 :
-        s_eject = np.append(s_eject,s[n])
-        Ye_eject = np.append(Ye_eject,Ye[n])
-        dM_eject = np.append(dM_eject,volume[n]*rho[n]/Msolar)
-        
-print(s_eject.size)
+    xinp = np.append(xinp,xtmp)
+    yinp = np.append(yinp,ytmp)
+    zinp = np.append(zinp,ztmp)
 
 ####################
-# histgram
+# Linear
 ####################
-otputfile="./test.png"
+otputfile="./testLin.png"
 
 fig=plt.figure()
 
@@ -66,28 +49,55 @@ toty=1
 index=1
 ax = fig.add_subplot(totx,toty,index)
 
-xbins=100
-ybins=100
-#ax.set_aspect('equal')
-#counts, xgrids, ygrids, image = ax.hist2d(Ye_eject,s_eject, bins=[xbins,ybins], weights=dM_eject)
-
-x_min, x_max = Ye_eject.min(), Ye_eject.max()
-y_min, y_max =  s_eject.min(),  s_eject.max()
+x_min, x_max = xinp.min(), xinp.max()
+y_min, y_max = yinp.min(), yinp.max()
 
 new_x_coord = np.linspace(x_min, x_max, 100)
-new_y_coord = np.linspace(y_min, y_max, 100)
+new_y_coord = np.linspace(y_min, y_max, 300)
 
 xx, yy = np.meshgrid(new_x_coord, new_y_coord)
 
-knew_xy_coord = Ye_eject, s_eject,
-knew_values = dM_eject
+knew_xy_coord = xinp, yinp
+knew_values   = zinp
 
 result = griddata(points=knew_xy_coord, values=knew_values, xi=(xx, yy), method='nearest')
 
 cs=ax.contourf(xx,yy,result)
+ax.set_xlabel(r'$x$', fontsize=fsizeforfig, fontname=fnameforfig)
+ax.set_ylabel(r'$y$', fontsize=fsizeforfig, fontname=fnameforfig)
 
-ax.set_xlabel(r'$Y_e$', fontsize=fsizeforfig, fontname=fnameforfig)
-ax.set_ylabel(r'$s$'  , fontsize=fsizeforfig, fontname=fnameforfig)
+fig.colorbar(cs)
+fig.savefig(otputfile)
 
+####################
+# Log
+####################
+
+otputfile="./testLog.png"
+
+totx=1
+toty=1
+
+index=1
+fig=plt.figure()
+ax = fig.add_subplot(totx,toty,index)
+
+new_x_coord = np.linspace(x_min, x_max, 100)
+new_y_coord = np.linspace(np.log10(y_min), np.log10(y_max), 100)
+
+xx, yy = np.meshgrid(new_x_coord, new_y_coord)
+
+knew_xy_coord = xinp, np.log10(yinp)
+knew_values   = zinp
+
+result = griddata(points=knew_xy_coord, values=knew_values, xi=(xx, yy), method='nearest')
+
+cs=ax.contourf(xx,10**(yy),result)
+ax.set_xlabel(r'$x$', fontsize=fsizeforfig, fontname=fnameforfig)
+ax.set_ylabel(r'$y$', fontsize=fsizeforfig, fontname=fnameforfig)
+
+fig.colorbar(cs)
+
+ax.set_yscale('log')
 fig.savefig(otputfile)
 
