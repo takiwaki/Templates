@@ -6,7 +6,7 @@ FOPTS=-g -traceback
 .f.o: 
 	${FC} ${OPTS} -c $<
 
-all: ex1.exe ex2.exe
+all: ex1.exe ex2.exe ex4.exe
 
 ex1.exe: ex1.o mod1.o
 	${FC} ${OPTS} $^ -o $@
@@ -17,3 +17,8 @@ ex2.exe: ex2.o mod2.o
 	${FC} ${OPTS} $^ -o $@
 
 ex2.o: mod2.o
+
+ex4.exe: ex4.o mod2.o
+	${FC} ${OPTS} $^ -o $@
+
+ex4.o: mod2.o
