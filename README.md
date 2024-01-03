@@ -1,4 +1,4 @@
 # Templates
 
-This repositry is used to keep scripts.
+This repositry is uset to compile useful programs and scripts.
 
